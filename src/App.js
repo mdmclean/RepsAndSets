@@ -2,22 +2,22 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-class Movie extends Component {
+class Workout extends Component {
   render(){
     return (
-      <div>{this.props.title}</div>
+      <div>Workout on {this.props.timestamp}</div>
     );
   }
 }
 
-class MoviePane extends Component {
+class WorkoutPane extends Component {
   render() {
-    const movies = this.props.movies ?  this.props.movies.map ((movie, i) => {
-        return (<Movie key={i} title={movie.title}></Movie>);
-    }) : "no movies";
+    const workouts = this.props.workouts ?  this.props.workouts.map ((workout, i) => {
+        return (<Workout key={i} timestamp={workout.Timestamp}></Workout>);
+    }) : "no workouts";
     return (
      <div>
-       {movies}
+       {workouts}
       </div>
     )
   }
@@ -26,14 +26,14 @@ class MoviePane extends Component {
 class App extends Component {
   constructor() {
     super();
-    this.state = {movies: null}
+    this.state = {workouts: null}
   } 
   
-  getMoviesFromApiAsync() {
-    return fetch('https://facebook.github.io/react-native/movies.json')
+  getWorkoutsForUserAsync() {
+    return fetch('http://localhost:17234/api/workout?userId=1')
       .then((response) => response.json())
       .then((responseJson) => {
-        return responseJson.movies;
+        return responseJson;
       })
       .catch((error) => {
         console.error(error);
@@ -41,7 +41,20 @@ class App extends Component {
   }
 
   async componentDidMount() {
-    this.setState({movies: await this.getMoviesFromApiAsync()});
+    this.setState({workouts: await this.getWorkoutsForUserAsync()});
+  }
+
+  async newWorkout()
+  {
+    fetch('http://localhost:17234/api/workout?userId='+1+"&workoutDate="+ (new Date()).toJSON(), {
+  method: 'POST',
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+  },
+})
+   this.setState({workouts: await this.getWorkoutsForUserAsync()});
+
   }
 
 
@@ -49,10 +62,11 @@ class App extends Component {
     return (
       <div className="App">
         <div className="App-header">
-          <h2>Movies</h2>
+          <h2>Workouts</h2>
         </div>
-         <MoviePane
-            movies={this.state.movies}/>
+        <button className="square" onClick={() => this.newWorkout()}>New workout</button>
+         <WorkoutPane
+            workouts={this.state.workouts}/>
       </div>
     );
   }
